@@ -1,0 +1,6 @@
+2026/08/28-15:13:38.912 2a28 Reusing MANIFEST C:\Users\A10M\Desktop\univer\backend\.wwebjs_auth\session\Default\EdgeCoupons/coupons_data.db/MANIFEST-000001
+2026/08/28-15:13:38.913 2a28 Recovering log #23
+2026/08/28-15:13:38.913 2a28 Reusing old log C:\Users\A10M\Desktop\univer\backend\.wwebjs_auth\session\Default\EdgeCoupons/coupons_data.db/000023.log 
+2026/08/28-15:13:39.077 ad4 Level-0 table #27: started
+2026/08/28-15:13:39.084 ad4 Level-0 table #27: 683376 bytes OK
+2026/08/28-15:13:39.087 ad4 Delete type=0 #23

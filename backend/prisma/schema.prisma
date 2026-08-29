@@ -1,0 +1,256 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 1. Users & Roles
+// ==========================================
+
+enum Role {
+  ADMIN           // System Admin
+  MODERATOR       // Moderator (approves files)
+  REPRESENTATIVE  // Batch Representative (uploads files)
+  STUDENT         // Regular Student
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String   @unique
+  password  String
+  role      Role     @default(STUDENT)
+  
+  // Academic Relations
+  universityId Int?
+  collegeId    Int?
+  departmentId Int?
+  majorId      Int?
+  levelId      Int?
+
+  // Password Reset
+  resetOtp        String?
+  resetOtpExpires DateTime?
+  
+  isActive        Boolean   @default(true) // For banning/suspending users
+  telegramId      String?   @unique // For Telegram Bot linking
+
+  // Relations
+  uploadedDocs Document[] @relation("UploadedDocuments")
+  reviewedDocs Document[] @relation("ReviewedDocuments")
+  reports      Report[]
+  auditLogs    AuditLog[]
+  favorites    Favorite[]
+  reviews      Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// 2. Academic Structure
+// ==========================================
+
+model University {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  name_en   String?
+  logoUrl   String?
+  status    String    @default("verified")
+  colleges  College[]
+}
+
+model College {
+  id           Int          @id @default(autoincrement())
+  name         String
+  name_en      String?
+  status       String       @default("verified")
+  universityId Int
+  university   University   @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  departments  Department[]
+}
+
+model Department {
+  id        Int       @id @default(autoincrement())
+  name      String
+  name_en   String?
+  status    String    @default("verified") // verified, needs_verification, archived
+  collegeId Int
+  college   College   @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  majors    Major[]
+}
+
+model Major {
+  id           Int        @id @default(autoincrement())
+  name         String
+  name_en      String?
+  status       String     @default("verified")
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  levels       Level[]
+}
+
+model Level {
+  id           Int        @id @default(autoincrement())
+  name         String    
+  name_en      String?
+  status       String     @default("verified")
+  majorId      Int
+  major        Major      @relation(fields: [majorId], references: [id], onDelete: Cascade)
+  subjects     Subject[]
+}
+
+model Subject {
+  id          Int        @id @default(autoincrement())
+  name        String     
+  name_en     String?
+  code        String?    // رمز المادة
+  creditHours Int?       // عدد الساعات
+  type        String?    // إجبارية / اختيارية
+  prerequisite String?   // المتطلب السابق
+  semester    Int        @default(1) // 1 for الفصل الأول, 2 for الفصل الثاني
+  status      String     @default("verified")
+  
+  levelId     Int
+  level       Level      @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  documents   Document[]
+}
+
+// ==========================================
+// 2.5 Academic Sources (مصادر البيانات)
+// ==========================================
+
+model AcademicSource {
+  id                  Int       @id @default(autoincrement())
+  universityId        Int
+  title               String
+  url                 String?   @db.Text
+  source_type         String    // الموقع الرسمي للجامعة, الخطة الدراسية الرسمية, الخ
+  publication_date    DateTime?
+  accessed_at         DateTime  @default(now())
+  verification_status String    @default("verified")
+}
+
+// ==========================================
+// 3. Files & Approval System
+// ==========================================
+
+enum DocStatus {
+  PENDING   
+  APPROVED  
+  REJECTED  
+}
+
+enum DocType {
+  BOOK      
+  RESEARCH  
+  SUMMARY   
+  EXAM      
+}
+
+model Document {
+  id               Int       @id @default(autoincrement())
+  title            String    
+  description      String?   @db.Text 
+  fileUrl          String    
+  fileSize         String?   // e.g., "2.5 MB"
+  
+  type             DocType   
+  status           DocStatus @default(PENDING)
+  rejectionReason  String?   @db.Text 
+
+  isGeneral        Boolean   @default(false) // For general references/books
+  category         String?   // e.g., "بحوثات", "مراجع دولية"
+
+  subjectId        Int?
+  subject          Subject?  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  uploaderId       Int
+  uploader         User      @relation("UploadedDocuments", fields: [uploaderId], references: [id])
+  
+  reviewerId       Int?      
+  reviewer         User?     @relation("ReviewedDocuments", fields: [reviewerId], references: [id])
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  reports          Report[]
+  favorites        Favorite[]
+  reviews          Review[]
+}
+
+// ==========================================
+// 4. Reports & Complaints
+// ==========================================
+
+model Report {
+  id          Int      @id @default(autoincrement())
+  reason      String   @db.Text
+  status      String   @default("PENDING") // PENDING, RESOLVED, DISMISSED
+  
+  documentId  Int
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  
+  reporterId  Int
+  reporter    User     @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// 5. Audit Logs (سجل النشاطات)
+// ==========================================
+
+model AuditLog {
+  id          Int      @id @default(autoincrement())
+  action      String   // e.g., "DOCUMENT_APPROVED", "USER_REGISTERED"
+  details     String   @db.Text // Human readable details or JSON
+  
+  userId      Int?     // Who performed the action (null if system)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime @default(now())
+}
+
+// ==========================================
+// 6. Favorites (المحفوظات)
+// ==========================================
+
+model Favorite {
+  id          Int      @id @default(autoincrement())
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  documentId  Int
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, documentId]) // A user can favorite a document only once
+}
+
+// ==========================================
+// 7. Reviews & Ratings (التقييم والتعليقات)
+// ==========================================
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  rating      Int      // 1 to 5
+  comment     String?  @db.Text
+  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  documentId  Int
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, documentId]) // A user can review a document only once
+}

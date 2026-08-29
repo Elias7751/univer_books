@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مكتبتي الجامعية</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">م</div>
+      <div>
+        <strong>مكتبتي الجامعية</strong>
+        <span>المراجع والكتب الأكاديمية</span>
+      </div>
+    </div>
+
+    <nav>
+      <a class="active" href="#home">الرئيسية</a>
+      <a href="#categories">التخصصات</a>
+      <a href="#latest">أحدث الإضافات</a>
+      <a href="#about">عن المنصة</a>
+    </nav>
+
+    <button class="telegram-btn" onclick="showToast('سيتم فتح بوت تيليجرام قريبًا')">
+      <span>✈</span> بوت تيليجرام
+    </button>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="badge">🎓 منصتك الأكاديمية في مكان واحد</div>
+        <h1>ابحث عن مرجعك،<br><span>وتعلّم بثقة.</span></h1>
+        <p>
+          مكتبة جامعية رقمية تجمع الكتب والبحوث والملازم والمحاضرات
+          وتساعدك على الوصول إلى المصادر المناسبة حسب الكلية والتخصص والمستوى.
+        </p>
+
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input id="searchInput" type="text" placeholder="ابحث باسم كتاب، مادة، مؤلف أو موضوع..." />
+          <button onclick="searchBooks()">بحث</button>
+        </div>
+
+        <div class="quick-links">
+          <span>بحث سريع:</span>
+          <button onclick="quickSearch('شبكات')">شبكات الحاسوب</button>
+          <button onclick="quickSearch('قواعد البيانات')">قواعد البيانات</button>
+          <button onclick="quickSearch('برمجة')">البرمجة</button>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="floating-card card-one">
+          <span class="mini-icon">📚</span>
+          <div><strong>1,240+</strong><small>مرجع وكتاب</small></div>
+        </div>
+        <div class="library-illustration">
+          <div class="circle"></div>
+          <div class="book book-a"></div>
+          <div class="book book-b"></div>
+          <div class="book book-c"></div>
+          <div class="screen">
+            <div class="screen-line"></div>
+            <div class="screen-line short"></div>
+            <div class="screen-line"></div>
+            <div class="screen-line tiny"></div>
+          </div>
+        </div>
+        <div class="floating-card card-two">
+          <span class="check">✓</span>
+          <div><strong>موثوق ومراجع</strong><small>كل ملف يمر بالمراجعة</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats">
+      <div><strong>1,240+</strong><span>كتاب ومرجع</span></div>
+      <div><strong>350+</strong><span>بحث أكاديمي</span></div>
+      <div><strong>48</strong><span>تخصصًا</span></div>
+      <div><strong>12</strong><span>كلية</span></div>
+    </section>
+
+    <section class="section" id="categories">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">تصفح بسهولة</span>
+          <h2>اختر مسارك الأكاديمي</h2>
+        </div>
+        <button class="outline-btn" onclick="showToast('سيتم فتح جميع الكليات')">عرض الكل ←</button>
+      </div>
+
+      <div class="category-grid">
+        <button class="category-card" onclick="showToast('فتح كلية الحاسوب')">
+          <span class="cat-icon blue">⌘</span><strong>كلية الحاسوب</strong><small>تقنية المعلومات • علوم الحاسوب</small><b>120+ مرجع</b>
+        </button>
+        <button class="category-card" onclick="showToast('فتح كلية الهندسة')">
+          <span class="cat-icon orange">⌁</span><strong>كلية الهندسة</strong><small>مدني • كهرباء • معماري</small><b>180+ مرجع</b>
+        </button>
+        <button class="category-card" onclick="showToast('فتح كلية الطب')">
+          <span class="cat-icon green">✚</span><strong>كلية الطب</strong><small>طب عام • مختبرات • تمريض</small><b>240+ مرجع</b>
+        </button>
+        <button class="category-card" onclick="showToast('فتح كلية الإدارة')">
+          <span class="cat-icon purple">▦</span><strong>كلية الإدارة</strong><small>إدارة • محاسبة • اقتصاد</small><b>150+ مرجع</b>
+        </button>
+      </div>
+    </section>
+
+    <section class="section latest" id="latest">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">تمت إضافتها مؤخرًا</span>
+          <h2>أحدث المراجع والملفات</h2>
+        </div>
+        <div class="filters">
+          <button class="filter active" onclick="filterBooks('all', this)">الكل</button>
+          <button class="filter" onclick="filterBooks('book', this)">كتب</button>
+          <button class="filter" onclick="filterBooks('research', this)">أبحاث</button>
+          <button class="filter" onclick="filterBooks('lecture', this)">محاضرات</button>
+        </div>
+      </div>
+
+      <div class="book-grid" id="bookGrid">
+        <article class="book-card" data-type="book" data-search="شبكات الحاسوب computer networks">
+          <div class="cover cover-blue"><span>NETWORKS</span><strong>Computer<br>Networks</strong><small>أساسيات الشبكات</small></div>
+          <div class="book-info"><span class="tag">كتاب</span><h3>أساسيات شبكات الحاسوب</h3><p>قسم تقنية المعلومات • المستوى الثالث</p><div class="book-bottom"><span>✓ موثوق</span><button onclick="openBook('أساسيات شبكات الحاسوب')">التفاصيل</button></div></div>
+        </article>
+
+        <article class="book-card" data-type="research" data-search="قواعد البيانات database">
+          <div class="cover cover-purple"><span>DATABASE</span><strong>Database<br>Systems</strong><small>Research</small></div>
+          <div class="book-info"><span class="tag research">بحث</span><h3>أنظمة قواعد البيانات الحديثة</h3><p>علوم الحاسوب • المستوى الرابع</p><div class="book-bottom"><span>✓ موثوق</span><button onclick="openBook('أنظمة قواعد البيانات الحديثة')">التفاصيل</button></div></div>
+        </article>
+
+        <article class="book-card" data-type="lecture" data-search="برمجة javascript programming">
+          <div class="cover cover-orange"><span>PROGRAMMING</span><strong>JavaScript<br>Basics</strong><small>Lecture</small></div>
+          <div class="book-info"><span class="tag lecture">محاضرة</span><h3>مدخل إلى البرمجة الحديثة</h3><p>تقنية المعلومات • المستوى الأول</p><div class="book-bottom"><span>✓ موثوق</span><button onclick="openBook('مدخل إلى البرمجة الحديثة')">التفاصيل</button></div></div>
+        </article>
+      </div>
+
+      <div id="emptyState" class="empty hidden">
+        <span>🔎</span>
+        <h3>لم نجد نتائج</h3>
+        <p>جرّب كلمة بحث أخرى أو تصفح التخصصات.</p>
+      </div>
+    </section>
+
+    <section class="telegram-section">
+      <div>
+        <span class="eyebrow light">المكتبة معك أينما كنت</span>
+        <h2>لا تريد فتح الموقع؟ استخدم بوت تيليجرام.</h2>
+        <p>ابحث عن الكتب، اختر تخصصك وحمّل المرجع مباشرة من تيليجرام.</p>
+      </div>
+      <button onclick="showToast('سيتم فتح بوت تيليجرام قريبًا')">✈ ابدأ من تيليجرام</button>
+    </section>
+  </main>
+
+  <footer id="about">
+    <div><strong>مكتبتي الجامعية</strong><span>منصة أكاديمية لتنظيم ومشاركة المراجع الجامعية.</span></div>
+    <span>© 2026 جميع الحقوق محفوظة</span>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
